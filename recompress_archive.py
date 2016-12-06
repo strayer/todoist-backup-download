@@ -27,7 +27,7 @@ def compress_path_as_tar(path: str, tar_path: str):
     with tarfile.open(tar_path, "w|xz") as f_tar:
         # Not simply doing f_tar.add(path, arcname='') because it causes an
         # empty / folder to appear in the tar file
-        for entry in scandir.scandir(path):
+        for entry in scandir(path):
             f_tar.add(entry.path, arcname=entry.name)
 
 
