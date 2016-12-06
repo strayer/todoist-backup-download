@@ -9,7 +9,7 @@ import settings
 import todoist_api
 from todoist_api import TodoistBackup
 
-# Use the built-in version of scandir/walk if possible, otherwise
+# Use the built-in version of scandir if possible, otherwise
 # use the scandir module version
 try:
     from os import scandir
