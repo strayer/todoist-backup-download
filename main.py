@@ -3,22 +3,36 @@ import os
 
 import humanize
 import requests
+from typing import List
 
 import settings
 import todoist_api
+from todoist_api import TodoistBackup
 
 
-def build_full_backup_path(backup: todoist_api.TodoistBackup):
+def build_full_backup_path(backup: TodoistBackup):
     return os.path.join(
         settings.BACKUP_PATH,
         backup.safe_filename()
     )
 
 
+def dump_backup_list(backups: List[TodoistBackup]):
+    with open(os.path.join(settings.BACKUP_PATH, "backup-list.txt"), "w") as f:
+        f.write("Current backup list:\n\n")
+
+        if backups:
+            f.writelines([backup.safe_filename() + "\n" for backup in backups])
+        else:
+            f.write("no backups found via Todoist API")
+
+
 def main():
     logging.info("Starting backup download")
 
     backup_list = todoist_api.get_backup_list()
+
+    dump_backup_list(backup_list)
 
     if not backup_list:
         logging.info("No backups found, exiting.")
