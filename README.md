@@ -1,6 +1,9 @@
 Todoist backup downloader
 =========================
 
+![license MIT](https://img.shields.io/github/license/strayer/todoist-backup-download.svg)
+![python 3.3+](https://img.shields.io/badge/python-3.3%2B-blue.svg)
+
 A simple python3 script to be used to automate the download of Todoist backup
 files. Can be used as a cronjob with logging to syslog.
 
