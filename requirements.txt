@@ -1,3 +1,4 @@
 requests
 typing
 humanize
+scandir

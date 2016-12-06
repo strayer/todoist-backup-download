@@ -7,6 +7,9 @@ DEBUG = True
 TODOIST_TOKEN = ""
 BACKUP_PATH = os.path.join(os.path.dirname(__file__), "backups")
 
+# will be a subdir in BACKUP_PATH called 'archive' if not set in settings_local
+BACKUP_ARCHIVE_PATH = None
+
 SYSLOG_ENABLED = False
 if sys.platform == "linux":
     SYSLOG_ADDRESS = "/dev/log"
@@ -22,6 +25,8 @@ except ImportError:
     )
     sys.exit(1)
 
+if BACKUP_ARCHIVE_PATH is None:
+    BACKUP_ARCHIVE_PATH = os.path.join(BACKUP_PATH, "archive")
 
 logging_handlers = None
 logging_format = "%(levelname)s: %(message)s"

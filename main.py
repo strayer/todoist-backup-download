@@ -9,6 +9,13 @@ import settings
 import todoist_api
 from todoist_api import TodoistBackup
 
+# Use the built-in version of scandir/walk if possible, otherwise
+# use the scandir module version
+try:
+    from os import scandir
+except ImportError:
+    from scandir import scandir
+
 
 def build_full_backup_path(backup: TodoistBackup):
     return os.path.join(
@@ -27,6 +34,30 @@ def dump_backup_list(backups: List[TodoistBackup]):
             f.write("no backups found via Todoist API")
 
 
+def move_to_archive(filepath_to_move: str):
+    if not os.path.exists(settings.BACKUP_ARCHIVE_PATH):
+        os.mkdir(settings.BACKUP_ARCHIVE_PATH)
+
+    dst_path = os.path.join(
+        settings.BACKUP_ARCHIVE_PATH,
+        os.path.basename(filepath_to_move)
+    )
+
+    os.rename(filepath_to_move, dst_path)
+
+
+def move_old_backups_to_archive(backups: List[TodoistBackup]):
+    backup_filenames = [backup.safe_filename() for backup in backups]
+
+    for entry in scandir(settings.BACKUP_PATH):
+        if entry.is_file() and entry.name[-4:] == ".zip":
+            if entry.name in backup_filenames:
+                continue
+
+            logging.info("Moving backup %s to archive" % entry.name)
+            move_to_archive(entry.path)
+
+
 def main():
     logging.info("Starting backup download")
 
@@ -35,7 +66,7 @@ def main():
     dump_backup_list(backup_list)
 
     if not backup_list:
-        logging.info("No backups found, exiting.")
+        logging.info("No backups found via Todoist API")
 
     session = requests.session()
 
@@ -70,7 +101,10 @@ def main():
 
         logging.info("[backup:%s] Download finished" % backup.version)
 
+    move_old_backups_to_archive(backup_list)
+
     logging.info("All done")
+
 
 if __name__ == "__main__":
     main()
