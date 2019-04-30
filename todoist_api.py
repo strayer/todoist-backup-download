@@ -8,7 +8,8 @@ from urllib.parse import urlparse
 
 import settings
 
-TODOIST_BACKUPS_API_URL = "https://todoist.com/API/v7/backups/get"
+TODOIST_BACKUPS_API_URL = "https://todoist.com/API/v8/backups/get"
+TODOIST_REQUESTS_SESSION = requests.session()
 
 
 class TodoistBackup(object):
@@ -39,8 +40,11 @@ class TodoistBackup(object):
         )
 
 
+def get_requests_session():
+    return TODOIST_REQUESTS_SESSION
+
 def get_backup_list() -> List[TodoistBackup]:
-    r = requests.post(TODOIST_BACKUPS_API_URL, {
+    r = TODOIST_REQUESTS_SESSION.post(TODOIST_BACKUPS_API_URL, {
         "token": settings.TODOIST_TOKEN
     })
 

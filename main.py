@@ -7,7 +7,7 @@ from typing import List
 
 import settings
 import todoist_api
-from todoist_api import TodoistBackup
+from todoist_api import TodoistBackup, get_requests_session
 
 # Use the built-in version of scandir if possible, otherwise
 # use the scandir module version
@@ -60,6 +60,7 @@ def move_old_backups_to_archive(backups: List[TodoistBackup]):
 
 def main():
     logging.info("Starting backup download")
+    session = get_requests_session()
 
     backup_list = todoist_api.get_backup_list()
 
@@ -67,8 +68,6 @@ def main():
 
     if not backup_list:
         logging.info("No backups found via Todoist API")
-
-    session = requests.session()
 
     for backup in backup_list:
         backup_path = build_full_backup_path(backup)
@@ -81,13 +80,22 @@ def main():
 
         logging.info("[backup:%s] Downloading backup" % backup.version)
 
-        backup_size = session.head(backup.url).headers["content-length"]
+        backup_size = session.head(
+            backup.url,
+            headers={"Authorization": "Bearer " + settings.TODOIST_TOKEN},
+            allow_redirects=True
+        ).headers["content-length"]
         if backup_size:
             logging.info("[backup:%s] %s" % (
                 backup.version, humanize.naturalsize(backup_size)
             ))
 
-        r = session.get(backup.url, stream=True, timeout=1)
+        r = session.get(
+            backup.url,
+            stream=True,
+            timeout=1,
+            headers={"Authorization": "Bearer " + settings.TODOIST_TOKEN},
+        )
 
         if not r.ok:
             logging.error("[backup:%s] Download failed! (%s)" % (
